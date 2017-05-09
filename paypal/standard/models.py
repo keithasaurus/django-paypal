@@ -203,7 +203,7 @@ class PayPalStandardBase(Model):
 
     # This undocumented variable apparently contains the same as the 'custom'
     # field - http://stackoverflow.com/questions/8464442/set-transaction-subject-paypal-ipn
-    transaction_subject = models.CharField(max_length=256, blank=True)
+    transaction_subject = models.CharField(max_length=1024, blank=True)
 
     # @@@ Mass Pay Variables (Not Implemented, needs a separate model, for each transaction x)
     # fraud_managment_pending_filters_x = models.CharField(max_length=255, blank=True)
