@@ -1,14 +1,15 @@
 Release process
 ---------------
 
-* Change docs/release_notes.rst to remove " (under development)"
-
 * Run all tests::
 
     tox
 
   Or check Travis, if it has run against the latest source code:
   https://travis-ci.org/spookylukey/django-paypal
+
+* Change docs/release_notes.rst to remove "under development" and replace with
+  date.
 
 * Update version numbers:
 
@@ -20,7 +21,7 @@ Release process
 
 * Release to PyPI::
 
-    ./setup.py sdist bdist_wheel upload
+    $ ./release.sh
 
 * Tag and push, for example.::
 

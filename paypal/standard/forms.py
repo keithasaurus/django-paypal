@@ -13,11 +13,10 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from paypal.standard.conf import (
-    DONATION_IMAGE, DONATION_SANDBOX_IMAGE, IMAGE, PAYPAL_CERT, PAYPAL_CERT_ID, PAYPAL_PRIVATE_CERT,
-    PAYPAL_PUBLIC_CERT, POSTBACK_ENDPOINT, SANDBOX_IMAGE, SANDBOX_POSTBACK_ENDPOINT, SUBSCRIPTION_IMAGE,
-    SUBSCRIPTION_SANDBOX_IMAGE
+    BUY_BUTTON_IMAGE, DONATION_BUTTON_IMAGE, PAYPAL_CERT, PAYPAL_CERT_ID, PAYPAL_PRIVATE_CERT, PAYPAL_PUBLIC_CERT,
+    POSTBACK_ENDPOINT, SANDBOX_POSTBACK_ENDPOINT, SUBSCRIPTION_BUTTON_IMAGE
 )
-from paypal.standard.widgets import ReservedValueHiddenInput, ValueHiddenInput
+from paypal.standard.widgets import ValueHiddenInput
 from paypal.utils import warn_untested
 
 log = logging.getLogger(__name__)
@@ -97,7 +96,9 @@ class PayPalPaymentsForm(forms.Form):
         ("_xclick", "Buy now or Donations"),
         ("_donations", "Donations"),
         ("_cart", "Shopping cart"),
-        ("_xclick-subscriptions", "Subscribe")
+        ("_xclick-subscriptions", "Subscribe"),
+        ("_xclick-auto-billing", "Automatic Billing"),
+        ("_xclick-payment-plan", "Installment Plan"),
     )
     SHIPPING_CHOICES = ((1, "No shipping"), (0, "Shipping"))
     NO_NOTE_CHOICES = ((1, "No Note"), (0, "Include Note"))
@@ -114,43 +115,6 @@ class PayPalPaymentsForm(forms.Form):
     SUBSCRIBE = 'subscribe'
     DONATE = 'donate'
 
-    # Where the money goes.
-    business = forms.CharField(widget=ValueHiddenInput())
-
-    # Item information.
-    amount = forms.IntegerField(widget=ValueHiddenInput())
-    item_name = forms.CharField(widget=ValueHiddenInput())
-    item_number = forms.CharField(widget=ValueHiddenInput())
-    quantity = forms.CharField(widget=ValueHiddenInput())
-
-    # Subscription Related.
-    a1 = forms.CharField(widget=ValueHiddenInput())   # Trial 1 Price
-    p1 = forms.CharField(widget=ValueHiddenInput())   # Trial 1 Duration
-    t1 = forms.CharField(widget=ValueHiddenInput())   # Trial 1 unit of Duration, default to Month
-    a2 = forms.CharField(widget=ValueHiddenInput())   # Trial 2 Price
-    p2 = forms.CharField(widget=ValueHiddenInput())   # Trial 2 Duration
-    t2 = forms.CharField(widget=ValueHiddenInput())   # Trial 2 unit of Duration, default to Month
-    a3 = forms.CharField(widget=ValueHiddenInput())   # Subscription Price
-    p3 = forms.CharField(widget=ValueHiddenInput())   # Subscription Duration
-    t3 = forms.CharField(widget=ValueHiddenInput())   # Subscription unit of Duration, default to Month
-    src = forms.CharField(widget=ValueHiddenInput())  # Is billing recurring? default to yes
-    sra = forms.CharField(widget=ValueHiddenInput())  # Reattempt billing on failed cc transaction
-    no_note = forms.CharField(widget=ValueHiddenInput())
-    # Can be either 1 or 2. 1 = modify or allow new subscription creation, 2 = modify only
-    modify = forms.IntegerField(widget=ValueHiddenInput())  # Are we modifying an existing subscription?
-
-    # Localization / PayPal Setup
-    lc = forms.CharField(widget=ValueHiddenInput())
-    page_style = forms.CharField(widget=ValueHiddenInput())
-    cbt = forms.CharField(widget=ValueHiddenInput())
-
-    # IPN control.
-    notify_url = forms.CharField(widget=ValueHiddenInput())
-    cancel_return = forms.CharField(widget=ValueHiddenInput())
-    return_url = forms.CharField(widget=ReservedValueHiddenInput(attrs={"name": "return"}))
-    custom = forms.CharField(widget=ValueHiddenInput())
-    invoice = forms.CharField(widget=ValueHiddenInput())
-
     # Default fields.
     cmd = forms.ChoiceField(widget=forms.HiddenInput(), initial=CMD_CHOICES[0][0])
     charset = forms.CharField(widget=forms.HiddenInput(), initial="utf-8")
@@ -162,19 +126,18 @@ class PayPalPaymentsForm(forms.Form):
         super(PayPalPaymentsForm, self).__init__(*args, **kwargs)
         self.button_type = button_type
         if 'initial' in kwargs:
-            kwargs['initial'] = self._fix_deprecated_paypal_receiver_email(kwargs['initial'])
+            kwargs['initial'] = self._fix_deprecated_return_url(kwargs['initial'])
             # Dynamically create, so we can support everything PayPal does.
             for k, v in kwargs['initial'].items():
                 if k not in self.base_fields:
                     self.fields[k] = forms.CharField(label=k, widget=ValueHiddenInput(), initial=v)
 
-    def _fix_deprecated_paypal_receiver_email(self, initial_args):
-        if 'business' not in initial_args:
-            if hasattr(settings, 'PAYPAL_RECEIVER_EMAIL'):
-                warn("""The use of the settings.PAYPAL_RECEIVER_EMAIL is Deprecated.
-                        The keyword business argument must be given to PayPalPaymentsForm
-                        on creation""", DeprecationWarning)
-                initial_args['business'] = settings.PAYPAL_RECEIVER_EMAIL
+    def _fix_deprecated_return_url(self, initial_args):
+        if 'return_url' in initial_args:
+            warn("""The use of the initial['return_url'] is Deprecated.
+                    Please use initial['return'] instead""", DeprecationWarning)
+            initial_args['return'] = initial_args['return_url']
+            del initial_args['return_url']
         return initial_args
 
     def test_mode(self):
@@ -190,25 +153,15 @@ class PayPalPaymentsForm(forms.Form):
     def render(self):
         return format_html(u"""<form action="{0}" method="post">
     {1}
-    <input type="image" src="{2}" border="0" name="submit" alt="Buy it Now" />
+    <input type="image" src="{2}" name="submit" alt="Buy it Now" />
 </form>""", self.get_endpoint(), self.as_p(), self.get_image())
-
-    def sandbox(self):
-        "Deprecated.  Use self.render() instead."
-        import warnings
-        warnings.warn("""PaypalPaymentsForm.sandbox() is deprecated.
-                    Use the render() method instead.""", DeprecationWarning)
-        return self.render()
 
     def get_image(self):
         return {
-            (True, self.SUBSCRIBE): SUBSCRIPTION_SANDBOX_IMAGE,
-            (True, self.BUY): SANDBOX_IMAGE,
-            (True, self.DONATE): DONATION_SANDBOX_IMAGE,
-            (False, self.SUBSCRIBE): SUBSCRIPTION_IMAGE,
-            (False, self.BUY): IMAGE,
-            (False, self.DONATE): DONATION_IMAGE,
-        }[self.test_mode(), self.button_type]
+            self.SUBSCRIBE: SUBSCRIPTION_BUTTON_IMAGE,
+            self.BUY: BUY_BUTTON_IMAGE,
+            self.DONATE: DONATION_BUTTON_IMAGE,
+        }[self.button_type]
 
     def is_transaction(self):
         warn_untested()
@@ -235,7 +188,6 @@ class PayPalEncryptedPaymentsForm(PayPalPaymentsForm):
 
     def __init__(self, private_cert=PAYPAL_PRIVATE_CERT, public_cert=PAYPAL_PUBLIC_CERT,
             paypal_cert=PAYPAL_CERT, cert_id=PAYPAL_CERT_ID, *args, **kwargs):
-        warn_untested()
         super(PayPalEncryptedPaymentsForm, self).__init__(*args, **kwargs)
         self.private_cert = private_cert
         self.public_cert = public_cert
@@ -244,7 +196,6 @@ class PayPalEncryptedPaymentsForm(PayPalPaymentsForm):
 
     def _encrypt(self):
         """Use your key thing to encrypt things."""
-        warn_untested()
         from M2Crypto import BIO, SMIME, X509
 
         # Iterate through the fields and pull out the ones that have a value.
@@ -256,9 +207,6 @@ class PayPalEncryptedPaymentsForm(PayPalPaymentsForm):
             elif field.initial is not None:
                 value = field.initial
             if value is not None:
-                # @@@ Make this less hackish and put it in the widget.
-                if name == "return_url":
-                    name = "return"
                 plaintext += u'%s=%s\n' % (name, value)
         plaintext = plaintext.encode('utf-8')
 
@@ -276,10 +224,9 @@ class PayPalEncryptedPaymentsForm(PayPalPaymentsForm):
         p7 = s.encrypt(tmp, flags=SMIME.PKCS7_BINARY)
         out = BIO.MemoryBuffer()
         p7.write(out)
-        return out.read()
+        return out.read().decode()
 
     def as_p(self):
-        warn_untested()
         return mark_safe(u"""
 <input type="hidden" name="cmd" value="_s-xclick" />
 <input type="hidden" name="encrypted" value="%s" />

@@ -16,16 +16,16 @@ See https://django-paypal.readthedocs.org/ for documentation.
 
 django-paypal supports:
 
-* Django 1.6 to 1.8 on Python 2.7, 3.3 and 3.4.
-* Django 1.9 to 1.11 on Python 2.7, 3.4 and 3.5.
+* Django 1.11+
+* Python 2.7, and 3.4+
 
-Please read the docs if you are upgrading from Django 1.7
+(Not all combinations are supported).
 
 Project status
 ==============
 
-This project is *active* but in *maintenance mode*. The maintainers see their
-primary responsibilities as:
+This is an Open Source project that is *active* but in *maintenance mode*. The
+maintainers see their primary responsibilities as:
 
 * fixing any critical data loss or security bugs.
 * keeping the project up-to-date with new versions of Django (or other
@@ -49,57 +49,24 @@ That said, if you do have large changes that you want to contribute, including
 large new features (such as implementing newer PayPal payment methods), they
 will be gladly accepted if they are implemented well.
 
-Issue tracker and support requests
-==================================
+Please see `CONTRIBUTING.rst <CONTRIBUTING.rst>`_ for more information about
+using the issue tracker and pull requests.
 
-The GitHub issue tracker is for reporting bugs in django-paypal, or proposed
-features. It is not for support requests - please see the django-paypal docs,
-or the relevant PayPal docs. Issues (or emails to the maintainers) that are
-really support requests and do not involve fixing django-paypal (or its docs)
-will be ignored/closed.
+Paid support
+============
 
-Contributing to django-paypal
-=============================
+Some of the maintainers are able to provide support on a paid basis for this
+Open Source project. This includes the following kinds of things:
 
-If you want to contribute (yay!), please create a fork and start a branch off
-'master' for your changes. Submit a PR on GitHub to request that it is merged.
+* Paying for bug fixes or new features (with the understanding that these
+  changes will become freely available as part of the project and are not
+  'owned' by the person who paid for them).
 
-Since this project is in maintenance mode, the maintainers will merge patches,
-but not ones that make more work for them in future, or do not benefit the other
-users of the project - for example, code that is not covered by automated tests,
-or large backwards incompatible changes that aren't necessary.
+* Debugging or other support for integrating django-paypal into your project.
 
-Remember that a new feature that is neither documented nor covered by tests is
-not actually a contribution to the project, but only benefits the person who
-“contributed” it, and so won't be accepted.
+* Implementing the integration for you from scratch.
 
-In more detail, please see the following guidelines and hints:
+If you are interested in these, you can contact the follower developers:
 
-**isort** keeps imports in order. Run **tox -e isort-check** to check your
-imports, and **isort <PATHPATH>** to fix them. Use **# isort:skip** to
-get imports to be ignored by isort.
-
-All bug fixes and new features will require tests to accompany them, unless it
-is very difficult to write the test (e.g. non deterministic behaviour). The
-tests should fail without the fix/feature.
-
-Please add to docs/release_notes.rst for any significant bug fixes or new features.
-
-New features need documentation adding in docs/
-
-See docs/tests.rst for info about running the test suite.
-
-If you make changes to the models, please create migrations for both Django 1.7+
-and South e.g.::
-
-    ./manage.py makemigrations ipn
-
-    ./manage.py schemamigration --auto ipn
-
-If a pull request doesn't meet these requirements, and is not updated for 6
-months after feedback is given to the author, it will be assumed they have lost
-interest and the PR will be closed.
-
-Contributors of any kind are expected to act with politeness to all other
-contributors, in pull requests, issue trackers etc., and harassing behaviour
-will not be tolerated.
+* Luke Plant - `homepage <https://lukeplant.me.uk>`_,
+  `email <L.Plant.98@cantab.net>`_ - long time Django expert and contributor.

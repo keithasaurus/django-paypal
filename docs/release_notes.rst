@@ -3,8 +3,80 @@
 ===============
 
 
-Version 0.3.7 (under development)
----------------------------------
+Version 1.0 (2019-03-22)
+------------------------
+
+* Dropped support for versions of Django before 1.11
+
+* Encrypted button corrections
+
+* .encode() the encrypted result to avoid b'' decoration under Python 3
+
+* Fix the encrypted button examples in the documentation to use the encrypted form
+
+* Fixed issue #206 - DB migration required by Django 2.1
+
+* Support for almost all deprecated features removed, including:
+
+  * Signals deprecated in v0.2 (see notes below)
+  * Not passing ``nvp_handler`` to ``PayPalPro`` (see notes under 0.2)
+  * Using ``"amt"`` parameter with ``SetExpressCheckout`` and
+    ``DoExpressCheckoutPayment`` (see notes under 0.1.4 below)
+  * Settings deprecated in v0.4
+  * ``setCustomerBillingAgreement`` (pre 0.1.3 feature)
+  * ``PAYPAL_RECEIVER_EMAIL`` (see notes under 0.3)
+  * ``pdt`` view (see notes under 0.3)
+  * ``sandbox`` method on forms (see notes under 0.2)
+
+
+Version 0.5.0
+-------------
+
+* Dropped official support for Python 3.3
+
+* Support for Django 2.0
+
+* Fixed bug with IPv6 addresses (thanks @alexcrawley)
+
+* Tidy up and update PayPalPaymentsForm. Specifically:
+
+  * Where possible, remove explicit fields, leaving them to be handled by
+    __init__(), which creates fields as required from the contents of ``initial``.
+
+  * Deprecate field return_url - use field return instead. PayPal expects field
+    ``return``, but Python's return keyword meant it wasn't possible to set that field in
+    the class's definition. Later, code in __init__ was added to handle any value in ``initial``, in
+    particular ``initial['return']``. As the work around which renamed 'return' to 'return_url'
+    is not necessary, it is now being deprecated. To maintain backwards compatibility
+    initial['return_url'] is remapped to initial['return'], with a deprecation warning.
+
+    Thanks @JonathanRoach
+
+  * Add cmd choices for _xclick-auto-billing and _xclick-payment-plan.
+
+Version 0.4.1
+-------------
+
+* Added forgotten docs file
+
+Version 0.4.0
+-------------
+
+* Cleaned up and documented all settings related to button images. Specifically:
+
+  * The default images have been updated to recent ones. This is backwards
+    incompatible if you were relying on the previous (very old) image and had
+    not set ``PAYPAL_IMAGE`` in your settings.
+
+  * Removed separate settings for sandbox mode - these only meant more work when
+    configuring, and production looked different from sandbox by default. This
+    is backwards incompatible, but only affects development mode.
+
+  * Names of settings made clearer. The new names are:
+
+    * ``PAYPAL_BUY_BUTTON_IMAGE`` (was: ``PAYPAL_IMAGE``)
+    * ``PAYPAL_DONATION_BUTTON_IMAGE`` (was: ``PAYPAL_DONATION_IMAGE``)
+    * ``PAYPAL_SUBSCRIPTION_BUTTON_IMAGE`` (was: ``PAYPAL_SUBSCRIPTION_IMAGE``)
 
 
 Version 0.3.6
@@ -233,12 +305,12 @@ Version 0.2
 
     Instead:
 
-    * If you are using `PayPalWPP` directly, the returned `PayPalNVP` objects
+    * If you are using ``PayPalWPP`` directly, the returned ``PayPalNVP`` objects
       from all method should just be used. Remember that you need to handle
-      `PayPalFailure` exceptions from all direct calls.
+      ``PayPalFailure`` exceptions from all direct calls.
 
-    * If you are using the `PayPalPro` wrapper, you should pass a callable
-      `nvp_handler` keyword argument.
+    * If you are using the ``PayPalPro`` wrapper, you should pass a callable
+      ``nvp_handler`` keyword argument.
 
     Please see :doc:`pro/index`.
 

@@ -10,16 +10,13 @@ POSTBACK_ENDPOINT = "https://www.paypal.com/cgi-bin/webscr"
 SANDBOX_POSTBACK_ENDPOINT = "https://www.sandbox.paypal.com/cgi-bin/webscr"
 
 # Images
-IMAGE = getattr(settings, "PAYPAL_IMAGE", "https://images.paypal.com/images/x-click-but01.gif")
-SUBSCRIPTION_IMAGE = getattr(settings, "PAYPAL_SUBSCRIPTION_IMAGE",
+BUY_BUTTON_IMAGE = getattr(settings, "PAYPAL_BUY_BUTTON_IMAGE",
+                           "https://www.paypal.com/en_US/i/btn/btn_buynowCC_LG.gif")
+SUBSCRIPTION_BUTTON_IMAGE = getattr(settings, "PAYPAL_SUBSCRIPTION_BUTTON_IMAGE",
                              "https://www.paypal.com/en_US/i/btn/btn_subscribeCC_LG.gif")
-DONATION_IMAGE = getattr(settings, "PAYPAL_DONATION_IMAGE", "https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif")
-SANDBOX_IMAGE = getattr(settings, "PAYPAL_SANDBOX_IMAGE",
-                        "https://www.sandbox.paypal.com/en_US/i/btn/btn_buynowCC_LG.gif")
-SUBSCRIPTION_SANDBOX_IMAGE = getattr(settings, "PAYPAL_SUBSCRIPTION_SANDBOX_IMAGE",
-                                     "https://www.sandbox.paypal.com/en_US/i/btn/btn_subscribeCC_LG.gif")
-DONATION_SANDBOX_IMAGE = getattr(settings, "PAYPAL_DONATION_SANDBOX_IMAGE",
-                                 "https://www.sandbox.paypal.com/en_US/i/btn/btn_donateCC_LG.gif")
+DONATION_BUTTON_IMAGE = getattr(settings, "PAYPAL_DONATION_BUTTON_IMAGE",
+                                "https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif")
+
 
 # Paypal Encrypt Certificate
 PAYPAL_PRIVATE_CERT = getattr(settings, 'PAYPAL_PRIVATE_CERT', None)

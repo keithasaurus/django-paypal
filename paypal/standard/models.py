@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from warnings import warn
-
-from django.conf import settings
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -236,7 +233,7 @@ class PayPalStandardBase(Model):
 
     class Meta:
         abstract = True
-        app_label = 'paypal_standard_base'  # Keep Django 1.7 quiet
+        app_label = 'paypal_standard_base'
 
     def __unicode__(self):
         if self.is_transaction():
@@ -364,16 +361,6 @@ class PayPalStandardBase(Model):
                     self.set_flag("Invalid payment_status. (%s)" % self.payment_status)
                 if duplicate_txn_id(self):
                     self.set_flag("Duplicate txn_id. (%s)" % self.txn_id)
-                if hasattr(settings, 'PAYPAL_RECEIVER_EMAIL'):
-                    warn("Use of PAYPAL_RECEIVER_EMAIL in settings has been Deprecated.\n"
-                         "Check of valid email must be done when receiving the\n"
-                         "valid_ipn_received signal",
-                         DeprecationWarning)
-                    if self.receiver_email != settings.PAYPAL_RECEIVER_EMAIL:
-                        self.set_flag("Invalid receiver_email. (%s)" % self.receiver_email)
-            else:
-                # @@@ Run a different series of checks on recurring payments.
-                pass
 
         self.save()
 
